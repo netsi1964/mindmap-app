@@ -2,6 +2,7 @@
 import { analyzeTopic } from './llm-api.ts';
 import { initMindmap, renderMindmap } from './mindmap.ts';
 import { exportAsJSON, exportAsMarkdown, exportAsSVG, downloadFile } from './utils/export.ts';
+import { setupImportButton } from './utils/import.ts';
 
 // Theme toggle logic
 const themeToggle = document.getElementById('theme-toggle')!;
@@ -91,4 +92,15 @@ exportSvgBtn.addEventListener('click', () => {
   downloadFile(content, `${lastTopic}.svg`, 'image/svg+xml');
 });
 
-// TODO: Wire up import button and file input 
+const importBtn = document.getElementById('import-btn')!;
+const importFileInput = document.getElementById('import-file') as HTMLInputElement;
+
+setupImportButton(importBtn, importFileInput, (data) => {
+  lastTopic = data.topic;
+  lastPerspectives = data.perspectives;
+  topicInput.value = lastTopic;
+  if (!markmapInstance) {
+    markmapInstance = initMindmap(mindmapContainer);
+  }
+  renderMindmap(markmapInstance, lastTopic, lastPerspectives);
+}); 
