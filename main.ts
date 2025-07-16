@@ -1,5 +1,6 @@
 // main.ts
 import { analyzeTopic } from './llm-api.ts';
+import { initMindmap, renderMindmap } from './mindmap.ts';
 
 // Theme toggle logic
 const themeToggle = document.getElementById('theme-toggle')!;
@@ -30,6 +31,8 @@ const topicInput = document.getElementById('topic-input') as HTMLInputElement;
 const loadingDiv = document.getElementById('loading')!;
 const mindmapContainer = document.getElementById('mindmap-container')!;
 
+let markmapInstance: any = null;
+
 analyzeBtn.addEventListener('click', async () => {
   const topic = topicInput.value.trim();
   if (!topic) {
@@ -40,8 +43,16 @@ analyzeBtn.addEventListener('click', async () => {
   mindmapContainer.innerHTML = '';
   try {
     const result = await analyzeTopic(topic);
-    // Placeholder: Render JSON as pre block
-    mindmapContainer.innerHTML = `<pre class="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">${JSON.stringify(result, null, 2)}</pre>`;
+    // If markmap-lib is available, render mindmap
+    if (typeof initMindmap === 'function' && typeof renderMindmap === 'function') {
+      if (!markmapInstance) {
+        markmapInstance = initMindmap(mindmapContainer);
+      }
+      renderMindmap(markmapInstance, topic, result.perspektiver || result);
+    } else {
+      // Fallback: Render JSON as pre block
+      mindmapContainer.innerHTML = `<pre class="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">${JSON.stringify(result, null, 2)}</pre>`;
+    }
   } catch (err) {
     mindmapContainer.innerHTML = `<div class="text-red-500">Fejl: ${err}</div>`;
   } finally {
