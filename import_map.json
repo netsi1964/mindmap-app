@@ -4,4 +4,4 @@
     "markmap-lib": "https://esm.sh/markmap-lib",
     "dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts"
   }
-} 
+}

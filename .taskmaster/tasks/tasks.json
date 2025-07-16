@@ -134,11 +134,59 @@
         ],
         "status": "in-progress",
         "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement Interactive Node Expansion",
+        "description": "Implement the full interactive workflow where users can click a mindmap node to expand it with new, AI-generated sub-points.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add Node-Click Functionality in Frontend",
+            "description": "Add a click event listener to the mindmap container. When a node is clicked, identify it and extract its text content for the expansion prompt.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 11
+          },
+          {
+            "id": 2,
+            "title": "Create New Gemini Prompt for Expansion",
+            "description": "Create a new prompt template in prompts.ts. This prompt will instruct Gemini to generate 3-5 sub-points for a given topic/perspective, returning them in a structured JSON format.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 11
+          },
+          {
+            "id": 3,
+            "title": "New API Endpoint (/api/expand) in Backend",
+            "description": "Implement a new API endpoint, `/api/expand`, in `main.ts`. This endpoint will receive the clicked node's data, use the new expansion prompt to call the Gemini API, and return the generated sub-points.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 11
+          },
+          {
+            "id": 4,
+            "title": "Update Mindmap with New Data",
+            "description": "When the frontend receives the new sub-points from the `/api/expand` endpoint, find the corresponding node in the data structure, append the new data as children, and re-render the mindmap using `markmap.setData()` to display the expanded tree.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 11
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-16T16:07:08.088Z",
-      "updated": "2025-07-16T16:27:37.783Z",
+      "updated": "2025-07-16T20:23:51.205Z",
       "description": "Tasks for master context"
     }
   }

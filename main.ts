@@ -1,115 +1,61 @@
 // main.ts
-import { analyzeTopic } from './llm-api.ts';
-import { initMindmap, renderMindmap, addHoverFunctionality } from './mindmap.ts';
-import { exportAsJSON, exportAsMarkdown, exportAsSVG, downloadFile } from './utils/export.ts';
-import { setupImportButton } from './utils/import.ts';
+// Deno HTTP server for Mindmap AI Analyse App
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { extname, join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
-// Theme toggle logic
-const themeToggle = document.getElementById('theme-toggle')!;
-const html = document.documentElement;
+const PORT = 8000;
+const API_ROUTE = "/api/analyze";
 
-function setTheme(dark: boolean) {
-  if (dark) {
-    html.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    html.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
+async function handler(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  // Proxy LLM API requests
+  if (url.pathname === API_ROUTE && req.method === "POST") {
+    const body = await req.json();
+    const { topic } = body;
+    // Import the analyzeTopic function dynamically
+    const { analyzeTopic } = await import("./llm-api.ts");
+    try {
+      const result = await analyzeTopic(topic);
+      return new Response(JSON.stringify(result), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), {
+        status: 500,
+      });
+    }
   }
-}
 
-// Initialize theme from localStorage or system
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const savedTheme = localStorage.getItem('theme');
-setTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
-
-themeToggle.addEventListener('click', () => {
-  setTheme(!html.classList.contains('dark'));
-});
-
-// Analyze button logic
-const analyzeBtn = document.getElementById('analyze-btn') as HTMLButtonElement;
-const topicInput = document.getElementById('topic-input') as HTMLInputElement;
-const loadingDiv = document.getElementById('loading')!;
-const mindmapContainer = document.getElementById('mindmap-container')!;
-
-let markmapInstance: any = null;
-let lastTopic: string = '';
-let lastPerspectives: any[] = [];
-let mindmapInitialized = false;
-
-function ensureMindmapInitialized() {
-  if (!markmapInstance) {
-    markmapInstance = initMindmap(mindmapContainer);
-    addHoverFunctionality(mindmapContainer);
-    mindmapInitialized = true;
-  }
-}
-
-analyzeBtn.addEventListener('click', analyzeHandler);
-topicInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') analyzeHandler();
-});
-
-async function analyzeHandler() {
-  const topic = topicInput.value.trim();
-  if (!topic) {
-    alert('Indtast et emne!');
-    return;
-  }
-  loadingDiv.classList.remove('hidden');
-  analyzeBtn.disabled = true;
-  mindmapContainer.innerHTML = '';
+  // Serve static files
+  let filePath = url.pathname === "/" ? "/index.html" : url.pathname;
+  filePath = filePath.replace(/^\/+/, "");
   try {
-    const result = await analyzeTopic(topic);
-    lastTopic = topic;
-    lastPerspectives = result.perspektiver || result;
-    ensureMindmapInitialized();
-    renderMindmap(markmapInstance, topic, lastPerspectives);
-  } catch (err) {
-    mindmapContainer.innerHTML = `<div class="text-red-500">Fejl: ${err}</div>`;
-  } finally {
-    loadingDiv.classList.add('hidden');
-    analyzeBtn.disabled = false;
+    const file = await Deno.readFile(join(Deno.cwd(), filePath));
+    const ext = extname(filePath);
+    const contentType = ext === ".html"
+      ? "text/html"
+      : ext === ".js"
+      ? "application/javascript"
+      : ext === ".ts"
+      ? "application/typescript"
+      : ext === ".css"
+      ? "text/css"
+      : ext === ".json"
+      ? "application/json"
+      : ext === ".svg"
+      ? "image/svg+xml"
+      : ext === ".png"
+      ? "image/png"
+      : ext === ".jpg" || ext === ".jpeg"
+      ? "image/jpeg"
+      : "application/octet-stream";
+    return new Response(file, {
+      headers: { "Content-Type": contentType },
+    });
+  } catch (e) {
+    return new Response("Not found", { status: 404 });
   }
 }
 
-// Export buttons
-const exportJsonBtn = document.getElementById('export-json')!;
-const exportMdBtn = document.getElementById('export-md')!;
-const exportSvgBtn = document.getElementById('export-svg')!;
-
-function canExport() {
-  return lastTopic && lastPerspectives && lastPerspectives.length > 0;
-}
-
-exportJsonBtn.addEventListener('click', () => {
-  if (!canExport()) return alert('Ingen mindmap at eksportere!');
-  const content = exportAsJSON(lastTopic, lastPerspectives);
-  downloadFile(content, `${lastTopic}.json`, 'application/json');
-});
-
-exportMdBtn.addEventListener('click', () => {
-  if (!canExport()) return alert('Ingen mindmap at eksportere!');
-  const content = exportAsMarkdown(lastTopic, lastPerspectives);
-  downloadFile(content, `${lastTopic}.md`, 'text/markdown');
-});
-
-exportSvgBtn.addEventListener('click', () => {
-  if (!canExport()) return alert('Ingen mindmap at eksportere!');
-  const content = exportAsSVG(mindmapContainer);
-  if (!content) return alert('SVG ikke fundet!');
-  downloadFile(content, `${lastTopic}.svg`, 'image/svg+xml');
-});
-
-// Import
-const importBtn = document.getElementById('import-btn')!;
-const importFileInput = document.getElementById('import-file') as HTMLInputElement;
-
-setupImportButton(importBtn, importFileInput, (data) => {
-  lastTopic = data.topic;
-  lastPerspectives = data.perspectives;
-  topicInput.value = lastTopic;
-  ensureMindmapInitialized();
-  renderMindmap(markmapInstance, lastTopic, lastPerspectives);
-}); 
+console.log(`Mindmap AI server running on http://localhost:${PORT}`);
+serve(handler, { port: PORT });

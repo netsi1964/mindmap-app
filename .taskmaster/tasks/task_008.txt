@@ -1,0 +1,184 @@
+# Task ID: 8
+# Title: Main Application Logic
+# Status: done
+# Dependencies: 3, 5, 6, 7
+# Priority: high
+# Description: Implement the main application logic to connect all components
+# Details:
+1. Create main.js as the entry point
+2. Connect UI events to LLM API calls
+3. Handle the flow from user input to mindmap display
+4. Implement loading states and error handling
+5. Connect export and import functionality
+
+Example implementation in main.js:
+```js
+import { generatePerspectives } from './llm-api.js';
+import { initMindmap, renderMindmap, addHoverFunctionality } from './mindmap.js';
+import { exportAsJSON, exportAsMarkdown, exportAsSVG, downloadFile } from './utils/export.js';
+import { setupImportButton } from './utils/import.js';
+
+// State management
+let currentTopic = '';
+let currentPerspectives = [];
+let mindmap = null;
+
+// DOM elements
+const topicInput = document.getElementById('topic-input');
+const analyzeBtn = document.getElementById('analyze-btn');
+const loadingIndicator = document.getElementById('loading');
+const mindmapContainer = document.getElementById('mindmap-container');
+const exportJsonBtn = document.getElementById('export-json');
+const exportMdBtn = document.getElementById('export-md');
+const exportSvgBtn = document.getElementById('export-svg');
+const importBtn = document.getElementById('import-btn');
+const importFileInput = document.getElementById('import-file');
+const themeToggleBtn = document.getElementById('theme-toggle');
+
+// Initialize the application
+function init() {
+  // Initialize mindmap
+  mindmap = initMindmap(mindmapContainer);
+  addHoverFunctionality(mindmapContainer);
+  
+  // Set up event listeners
+  analyzeBtn.addEventListener('click', handleAnalyze);
+  topicInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAnalyze();
+  });
+  
+  // Export buttons
+  exportJsonBtn.addEventListener('click', handleExportJSON);
+  exportMdBtn.addEventListener('click', handleExportMarkdown);
+  exportSvgBtn.addEventListener('click', handleExportSVG);
+  
+  // Import functionality
+  setupImportButton(importBtn, importFileInput, handleImport);
+  
+  // Theme toggle
+  themeToggleBtn.addEventListener('click', toggleTheme);
+  
+  // Load theme preference
+  loadThemePreference();
+  
+  // Load example if available
+  loadExample();
+}
+
+// Handle analyze button click
+async function handleAnalyze() {
+  const topic = topicInput.value.trim();
+  if (!topic) {
+    alert('Please enter a topic');
+    return;
+  }
+  
+  // Show loading state
+  setLoading(true);
+  
+  try {
+    // Generate perspectives using LLM
+    const perspectives = await generatePerspectives(topic);
+    
+    // Update state
+    currentTopic = topic;
+    currentPerspectives = perspectives;
+    
+    // Render mindmap
+    renderMindmap(mindmap, currentTopic, currentPerspectives);
+  } catch (error) {
+    console.error('Analysis error:', error);
+    alert(`Error analyzing topic: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// Handle import
+function handleImport(data) {
+  if (!data) return;
+  
+  currentTopic = data.topic;
+  currentPerspectives = data.perspectives;
+  
+  // Update UI
+  topicInput.value = currentTopic;
+  
+  // Render mindmap
+  renderMindmap(mindmap, currentTopic, currentPerspectives);
+}
+
+// Export handlers
+function handleExportJSON() {
+  if (!currentTopic || !currentPerspectives.length) {
+    alert('No data to export');
+    return;
+  }
+  
+  const jsonData = exportAsJSON(currentTopic, currentPerspectives);
+  downloadFile(jsonData, `${currentTopic.toLowerCase().replace(/\s+/g, '-')}.json`, 'application/json');
+}
+
+function handleExportMarkdown() {
+  if (!currentTopic || !currentPerspectives.length) {
+    alert('No data to export');
+    return;
+  }
+  
+  const markdown = exportAsMarkdown(currentTopic, currentPerspectives);
+  downloadFile(markdown, `${currentTopic.toLowerCase().replace(/\s+/g, '-')}.md`, 'text/markdown');
+}
+
+function handleExportSVG() {
+  if (!mindmapContainer.querySelector('svg')) {
+    alert('No mindmap to export');
+    return;
+  }
+  
+  const svg = exportAsSVG(mindmapContainer);
+  downloadFile(svg, `${currentTopic.toLowerCase().replace(/\s+/g, '-')}.svg`, 'image/svg+xml');
+}
+
+// Theme toggle
+function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+function loadThemePreference() {
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+}
+
+// Helper functions
+function setLoading(isLoading) {
+  if (isLoading) {
+    loadingIndicator.classList.remove('hidden');
+    analyzeBtn.disabled = true;
+  } else {
+    loadingIndicator.classList.add('hidden');
+    analyzeBtn.disabled = false;
+  }
+}
+
+// Load example data if available
+async function loadExample() {
+  try {
+    const response = await fetch('./examples/superliga.json');
+    if (response.ok) {
+      const data = await response.json();
+      handleImport(data);
+    }
+  } catch (error) {
+    console.log('No example data available');
+  }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
+```
+
+# Test Strategy:
+Test the complete application flow from user input to mindmap display. Verify error handling for API failures. Test loading states and UI feedback. Verify that all components work together correctly. Test with various topics and edge cases. Verify that theme toggle works correctly. Test the example loading functionality.

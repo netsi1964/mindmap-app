@@ -1,0 +1,102 @@
+# Task ID: 6
+# Title: Export Functionality
+# Status: done
+# Dependencies: 5
+# Priority: medium
+# Description: Implement export functionality for JSON, Markdown, and SVG formats
+# Details:
+1. Create utils/export.js module
+2. Implement JSON export functionality
+3. Implement Markdown export functionality
+4. Implement SVG export functionality
+5. Add file download capabilities
+
+Example implementation in utils/export.js:
+```js
+/**
+ * Export the mindmap data as JSON
+ * @param {string} topic - The main topic
+ * @param {Array} perspectives - The perspectives data
+ * @returns {string} JSON string for download
+ */
+export function exportAsJSON(topic, perspectives) {
+  const data = {
+    topic,
+    perspectives,
+    exportDate: new Date().toISOString()
+  };
+  
+  return JSON.stringify(data, null, 2);
+}
+
+/**
+ * Export the mindmap data as Markdown
+ * @param {string} topic - The main topic
+ * @param {Array} perspectives - The perspectives data
+ * @returns {string} Markdown string for download
+ */
+export function exportAsMarkdown(topic, perspectives) {
+  let markdown = `# ${topic}\n\n`;
+  
+  perspectives.forEach((perspective, index) => {
+    markdown += `## ${perspective.title}\n\n`;
+    markdown += `**Category:** ${perspective.category}\n\n`;
+    markdown += `${perspective.description}\n\n`;
+  });
+  
+  return markdown;
+}
+
+/**
+ * Export the mindmap as SVG
+ * @param {HTMLElement} container - The container with the SVG
+ * @returns {string} SVG string for download
+ */
+export function exportAsSVG(container) {
+  const svg = container.querySelector('svg');
+  if (!svg) return null;
+  
+  // Clone the SVG to avoid modifying the displayed one
+  const clonedSvg = svg.cloneNode(true);
+  
+  // Add necessary attributes for standalone SVG
+  clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clonedSvg.setAttribute('version', '1.1');
+  
+  // Get computed styles and apply them inline for export
+  const svgElements = clonedSvg.querySelectorAll('*');
+  svgElements.forEach(el => {
+    const computedStyle = window.getComputedStyle(el);
+    const importantStyles = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size'];
+    
+    importantStyles.forEach(style => {
+      if (computedStyle[style]) {
+        el.style[style] = computedStyle[style];
+      }
+    });
+  });
+  
+  return new XMLSerializer().serializeToString(clonedSvg);
+}
+
+/**
+ * Download data as a file
+ * @param {string} content - The content to download
+ * @param {string} filename - The filename
+ * @param {string} contentType - The content type
+ */
+export function downloadFile(content, filename, contentType) {
+  const blob = new Blob([content], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+```
+
+# Test Strategy:
+Test each export format with various data structures. Verify that the exported files can be opened in appropriate applications. Test with special characters and large datasets. Verify that the download functionality works across different browsers. Test the SVG export to ensure styles are preserved.

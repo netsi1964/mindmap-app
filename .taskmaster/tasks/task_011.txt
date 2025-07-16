@@ -1,0 +1,37 @@
+# Task ID: 11
+# Title: Implement Interactive Node Expansion
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement the full interactive workflow where users can click a mindmap node to expand it with new, AI-generated sub-points.
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Add Node-Click Functionality in Frontend [pending]
+### Dependencies: None
+### Description: Add a click event listener to the mindmap container. When a node is clicked, identify it and extract its text content for the expansion prompt.
+### Details:
+
+
+## 2. Create New Gemini Prompt for Expansion [pending]
+### Dependencies: None
+### Description: Create a new prompt template in prompts.ts. This prompt will instruct Gemini to generate 3-5 sub-points for a given topic/perspective, returning them in a structured JSON format.
+### Details:
+
+
+## 3. New API Endpoint (/api/expand) in Backend [pending]
+### Dependencies: None
+### Description: Implement a new API endpoint, `/api/expand`, in `main.ts`. This endpoint will receive the clicked node's data, use the new expansion prompt to call the Gemini API, and return the generated sub-points.
+### Details:
+
+
+## 4. Update Mindmap with New Data [pending]
+### Dependencies: None
+### Description: When the frontend receives the new sub-points from the `/api/expand` endpoint, find the corresponding node in the data structure, append the new data as children, and re-render the mindmap using `markmap.setData()` to display the expanded tree.
+### Details:
+
+

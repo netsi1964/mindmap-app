@@ -1,0 +1,65 @@
+# Task ID: 10
+# Title: Deno Deploy Configuration
+# Status: in-progress
+# Dependencies: 1, 2, 3, 8
+# Priority: medium
+# Description: Configure the application for deployment on Deno Deploy
+# Details:
+1. Create necessary configuration files for Deno Deploy
+2. Ensure all imports are compatible with Deno runtime
+3. Configure environment variables for production
+4. Test the application in a Deno environment
+5. Create deployment documentation
+
+Example deno.json configuration:
+```json
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-env main.js",
+    "dev": "deno run --watch --allow-net --allow-read --allow-env main.js"
+  },
+  "importMap": "./import_map.json"
+}
+```
+
+Example import_map.json:
+```json
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/generative-ai",
+    "markmap-lib": "https://esm.sh/markmap-lib",
+    "dotenv": "https://deno.land/std/dotenv/mod.ts"
+  }
+}
+```
+
+Deployment steps documentation:
+```markdown
+# Deployment Guide for Mindmap AI Analyse App
+
+## Prerequisites
+- Deno installed locally
+- Deno Deploy account
+- Google Gemini API key
+
+## Local Development
+1. Clone the repository
+2. Create a `.env` file with your `GEMINI_API_KEY`
+3. Run `deno task dev` to start the development server
+
+## Deployment to Deno Deploy
+1. Push your code to a GitHub repository
+2. In Deno Deploy, create a new project
+3. Connect to your GitHub repository
+4. Set the entry point to `main.js`
+5. Add the environment variable `GEMINI_API_KEY` with your API key
+6. Deploy the project
+
+## Important Notes
+- Ensure all imports use ESM format
+- Do not commit your `.env` file to the repository
+- Use relative imports for local modules
+```
+
+# Test Strategy:
+Test the application in a local Deno environment before deployment. Verify that all imports work correctly in Deno. Test environment variable access in Deno. Verify that the application works correctly when deployed to Deno Deploy. Test the application with and without environment variables to ensure proper error handling.

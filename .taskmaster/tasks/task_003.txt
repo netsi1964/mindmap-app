@@ -1,0 +1,65 @@
+# Task ID: 3
+# Title: LLM API Integration
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Implement the Google Gemini LLM integration for generating mindmap content
+# Details:
+1. Create llm-api.js module
+2. Implement Google GenAI SDK integration
+3. Create function to fetch API key from environment variables
+4. Implement error handling for API calls
+5. Create a function to process user input and generate the 9 perspectives
+
+Example implementation in llm-api.js:
+```js
+import { GoogleGenAI } from '@google/genai';
+
+// Initialize the API client
+const initializeAI = () => {
+  try {
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) throw new Error('GEMINI_API_KEY not found in environment variables');
+    
+    return new GoogleGenAI({
+      apiKey: apiKey,
+    });
+  } catch (error) {
+    console.error('Error initializing AI:', error);
+    throw error;
+  }
+};
+
+// Generate perspectives for a given topic
+export async function generatePerspectives(topic) {
+  try {
+    const ai = initializeAI();
+    const model = ai.getGenerativeModel({ model: 'gemini-pro' });
+    
+    const prompt = `Generate 9 different perspectives on the topic "${topic}", ranging from positive to negative. For each perspective, provide a title, a brief description, and a category. Return the result as a JSON array with objects containing title, description, and category properties.`;
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Parse the JSON response
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error('Failed to parse LLM response as JSON:', e);
+      // Attempt to extract JSON from text if not properly formatted
+      const jsonMatch = text.match(/\[\s*\{.*\}\s*\]/s);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('Invalid response format from LLM');
+    }
+  } catch (error) {
+    console.error('Error generating perspectives:', error);
+    throw error;
+  }
+}
+```
+
+# Test Strategy:
+Test API integration with valid and invalid API keys. Verify error handling for network issues and API limits. Test the response parsing with various LLM outputs. Create mock responses to test the integration without making actual API calls. Verify the function returns the expected data structure with 9 perspectives.

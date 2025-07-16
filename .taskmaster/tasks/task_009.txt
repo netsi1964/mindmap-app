@@ -1,0 +1,69 @@
+# Task ID: 9
+# Title: Example Data Creation
+# Status: pending
+# Dependencies: 8
+# Priority: low
+# Description: Create example data for the application
+# Details:
+1. Create the examples directory
+2. Generate a sample analysis for 'Superliga' topic
+3. Save the analysis as superliga.json
+4. Ensure the example data follows the correct format
+
+Example superliga.json:
+```json
+{
+  "topic": "Superliga",
+  "perspectives": [
+    {
+      "title": "Economic Growth Opportunity",
+      "description": "The Superliga would create significant revenue streams for participating clubs through enhanced broadcasting deals and global marketing. This could lead to financial stability for clubs and investment in better facilities and youth development.",
+      "category": "Economics"
+    },
+    {
+      "title": "Elite Competition Quality",
+      "description": "A league featuring only top clubs would consistently produce high-quality matches between the best teams and players. This would elevate the overall standard of play and create more memorable sporting moments.",
+      "category": "Sport"
+    },
+    {
+      "title": "Global Fan Engagement",
+      "description": "The Superliga concept would appeal to international audiences and expand football's reach to new markets. This could grow the sport globally and create new fan communities across different regions.",
+      "category": "Cultural"
+    },
+    {
+      "title": "Competitive Balance Concerns",
+      "description": "While featuring elite clubs, the Superliga might create a permanent class system in football with limited mobility. This could reduce competitive unpredictability that makes sports compelling.",
+      "category": "Competition"
+    },
+    {
+      "title": "Tradition vs Innovation",
+      "description": "The Superliga represents a tension between football's traditional structures and the need for innovation. It raises questions about how the sport should evolve while respecting its heritage and community roots.",
+      "category": "Cultural"
+    },
+    {
+      "title": "Governance Challenges",
+      "description": "Creating a new elite competition raises complex regulatory and governance questions. The balance of power between clubs, national associations, and international bodies would need careful consideration.",
+      "category": "Political"
+    },
+    {
+      "title": "Threat to Domestic Leagues",
+      "description": "Establishing a Superliga could undermine the relevance and financial viability of traditional domestic competitions. This might harm smaller clubs and reduce the overall football ecosystem's health.",
+      "category": "Structural"
+    },
+    {
+      "title": "Fan Alienation Risk",
+      "description": "Many traditional supporters oppose the Superliga concept as contradicting football's community-based values. This disconnect between clubs and their historical fan bases could damage the sport's cultural foundations.",
+      "category": "Social"
+    },
+    {
+      "title": "Commercialization Concerns",
+      "description": "The Superliga represents an acceleration of football's commercialization, potentially prioritizing profit over sporting merit. This shift might fundamentally alter the nature of the game and its role in society.",
+      "category": "Ethical"
+    }
+  ],
+  "exportDate": "2023-06-15T12:00:00.000Z"
+}
+```
+
+# Test Strategy:
+Verify that the example data can be loaded correctly. Test that the example data renders properly in the mindmap. Verify that all required fields are present in the example data. Test that the example data can be exported and re-imported correctly.

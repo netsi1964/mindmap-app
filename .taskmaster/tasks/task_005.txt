@@ -1,0 +1,97 @@
+# Task ID: 5
+# Title: Mindmap Visualization
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Implement the interactive mindmap visualization using markmap-lib
+# Details:
+1. Create mindmap.js module
+2. Integrate markmap-lib for SVG rendering
+3. Implement functions to convert LLM output to markmap-compatible format
+4. Add interactivity for folding/unfolding nodes
+5. Implement hover functionality to show descriptions
+6. Add color coding based on categories
+
+Example implementation in mindmap.js:
+```js
+import { Markmap } from 'markmap-lib';
+
+// Convert LLM perspectives to markmap-compatible markdown
+function perspectivesToMarkdown(topic, perspectives) {
+  let markdown = `# ${topic}\n`;
+  
+  perspectives.forEach(perspective => {
+    markdown += `## ${perspective.title}\n`;
+    markdown += `- Category: ${perspective.category}\n`;
+    markdown += `- ${perspective.description}\n`;
+  });
+  
+  return markdown;
+}
+
+// Generate color based on category
+function getCategoryColor(category) {
+  // Simple hash function to generate consistent colors for categories
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) {
+    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const hue = Math.abs(hash % 360);
+  return `hsl(${hue}, 70%, 50%)`;
+}
+
+// Initialize the mindmap
+export function initMindmap(container) {
+  return Markmap.create(container);
+}
+
+// Render the mindmap with the given data
+export function renderMindmap(markmap, topic, perspectives) {
+  const markdown = perspectivesToMarkdown(topic, perspectives);
+  const data = Markmap.transform(markdown);
+  
+  // Add custom styling based on categories
+  data.forEach(node => {
+    if (node.content.includes('Category:')) {
+      const category = node.content.match(/Category: (\w+)/)[1];
+      node.style = { color: getCategoryColor(category) };
+    }
+  });
+  
+  markmap.setData(data);
+  markmap.fit();
+}
+
+// Add hover functionality to show descriptions
+export function addHoverFunctionality(container) {
+  container.addEventListener('mouseover', (event) => {
+    const target = event.target.closest('.markmap-node');
+    if (target) {
+      const description = target.getAttribute('data-description');
+      if (description) {
+        // Show tooltip with description
+        const tooltip = document.createElement('div');
+        tooltip.className = 'markmap-tooltip';
+        tooltip.textContent = description;
+        document.body.appendChild(tooltip);
+        
+        // Position tooltip near the node
+        const rect = target.getBoundingClientRect();
+        tooltip.style.left = `${rect.right + 10}px`;
+        tooltip.style.top = `${rect.top}px`;
+      }
+    }
+  });
+  
+  container.addEventListener('mouseout', () => {
+    const tooltip = document.querySelector('.markmap-tooltip');
+    if (tooltip) {
+      tooltip.remove();
+    }
+  });
+}
+```
+
+# Test Strategy:
+Test the mindmap rendering with various data structures. Verify that folding/unfolding nodes works correctly. Test hover functionality to ensure descriptions appear correctly. Verify color coding based on categories. Test with large datasets to ensure performance. Verify that the mindmap is responsive and works on different screen sizes.

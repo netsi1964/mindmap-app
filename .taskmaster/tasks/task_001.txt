@@ -1,0 +1,30 @@
+# Task ID: 1
+# Title: Project Setup and Configuration
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Initialize the project structure, configure Deno, and set up environment variables handling
+# Details:
+1. Create the basic file structure as specified in the PRD
+2. Initialize a Git repository
+3. Create a .gitignore file that excludes .env and other sensitive files
+4. Set up dotenv for environment variable handling
+5. Create a sample .env file with placeholder for GEMINI_API_KEY
+6. Configure Deno runtime settings
+7. Set up basic HTML structure in index.html with necessary script imports
+8. Initialize package.json if needed for development dependencies
+
+Example .gitignore content:
+```
+.env
+.DS_Store
+node_modules/
+```
+
+Example .env template:
+```
+GEMINI_API_KEY=your_api_key_here
+```
+
+# Test Strategy:
+Verify that the project structure matches the PRD requirements. Test that .env variables can be loaded correctly. Ensure Git repository is initialized with proper .gitignore settings. Confirm Deno can run the project without errors.

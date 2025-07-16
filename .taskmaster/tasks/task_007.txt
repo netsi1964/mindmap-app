@@ -1,0 +1,113 @@
+# Task ID: 7
+# Title: Import Functionality
+# Status: done
+# Dependencies: 6
+# Priority: medium
+# Description: Implement import functionality for previously exported JSON files
+# Details:
+1. Create utils/import.js module
+2. Implement file upload functionality
+3. Add JSON parsing and validation
+4. Implement error handling for invalid files
+5. Connect import functionality to mindmap rendering
+
+Example implementation in utils/import.js:
+```js
+/**
+ * Parse and validate imported JSON data
+ * @param {string} jsonString - The JSON string to parse
+ * @returns {Object} The parsed data object or null if invalid
+ */
+export function parseImportedJSON(jsonString) {
+  try {
+    const data = JSON.parse(jsonString);
+    
+    // Validate the imported data structure
+    if (!data.topic || !Array.isArray(data.perspectives)) {
+      throw new Error('Invalid data structure');
+    }
+    
+    // Validate each perspective has required fields
+    data.perspectives.forEach(perspective => {
+      if (!perspective.title || !perspective.description || !perspective.category) {
+        throw new Error('Invalid perspective data');
+      }
+    });
+    
+    return data;
+  } catch (error) {
+    console.error('Error parsing imported JSON:', error);
+    return null;
+  }
+}
+
+/**
+ * Handle file upload and reading
+ * @param {File} file - The uploaded file
+ * @returns {Promise<Object>} Promise resolving to the parsed data
+ */
+export function readImportedFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error('No file selected'));
+      return;
+    }
+    
+    // Verify file type
+    if (!file.name.endsWith('.json')) {
+      reject(new Error('Only JSON files are supported'));
+      return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const data = parseImportedJSON(event.target.result);
+        if (data) {
+          resolve(data);
+        } else {
+          reject(new Error('Invalid file format'));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Error reading file'));
+    };
+    
+    reader.readAsText(file);
+  });
+}
+
+/**
+ * Set up the file import button
+ * @param {HTMLElement} button - The import button element
+ * @param {HTMLElement} fileInput - The file input element
+ * @param {Function} onImport - Callback function when import is successful
+ */
+export function setupImportButton(button, fileInput, onImport) {
+  button.addEventListener('click', () => {
+    fileInput.click();
+  });
+  
+  fileInput.addEventListener('change', async (event) => {
+    try {
+      const file = event.target.files[0];
+      const data = await readImportedFile(file);
+      onImport(data);
+      
+      // Reset the file input
+      fileInput.value = '';
+    } catch (error) {
+      alert(`Import error: ${error.message}`);
+      console.error('Import error:', error);
+    }
+  });
+}
+```
+
+# Test Strategy:
+Test importing valid and invalid JSON files. Verify error handling for malformed JSON. Test with files that have missing required fields. Verify that imported data is correctly displayed in the mindmap. Test with large files to ensure performance. Test the file type validation.

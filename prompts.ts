@@ -26,7 +26,10 @@ Returnér KUN et JSON-array med denne struktur:
 `;
 }
 
-export function generateExpansionPrompt(topic: string, perspective: { titel: string }): string {
+export function generateExpansionPrompt(
+  topic: string,
+  perspective: { titel: string },
+): string {
   return `
 Uddyb perspektivet "${perspective.titel}" for emnet "${topic}".
 
@@ -46,4 +49,4 @@ Returnér KUN et JSON-array med denne struktur:
 `;
 }
 
-export const ANALYZE_TOPIC_PROMPT = generateAnalysisPrompt('{topic}'); 
+export const ANALYZE_TOPIC_PROMPT = generateAnalysisPrompt("{topic}");

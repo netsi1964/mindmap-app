@@ -1,0 +1,78 @@
+# Task ID: 4
+# Title: Prompt Engineering
+# Status: done
+# Dependencies: 3
+# Priority: medium
+# Description: Create effective prompts for the LLM to generate structured mindmap content
+# Details:
+1. Create prompts.js module to store and manage prompts
+2. Design a prompt template that instructs the LLM to generate exactly 9 perspectives
+3. Ensure the prompt requests specific fields: title, description, and category
+4. Include instructions for the LLM to provide a range from positive to negative perspectives
+5. Format the prompt to request JSON output for easy parsing
+
+Example implementation in prompts.js:
+```js
+// Prompt templates for different LLM requests
+
+/**
+ * Generate the main analysis prompt for a given topic
+ * @param {string} topic - The user-provided topic to analyze
+ * @returns {string} The formatted prompt
+ */
+export function generateAnalysisPrompt(topic) {
+  return `
+I need a comprehensive analysis of the topic "${topic}" presented as 9 distinct perspectives ranging from positive to negative.
+
+For each perspective, provide:
+1. A concise title (3-5 words)
+2. A detailed description (2-3 sentences)
+3. A category label (one word that represents the theme of this perspective)
+
+Ensure the perspectives cover a wide range of viewpoints, with:
+- Perspectives 1-3: Positive/optimistic views
+- Perspectives 4-6: Neutral/balanced views
+- Perspectives 7-9: Critical/challenging views
+
+Return ONLY a JSON array with this exact structure:
+[
+  {
+    "title": "Perspective Title",
+    "description": "Detailed description of this perspective.",
+    "category": "CategoryName"
+  },
+  // ... 8 more objects with the same structure
+]
+`;
+}
+
+/**
+ * Generate a prompt for expanding a specific perspective
+ * @param {string} topic - The main topic
+ * @param {Object} perspective - The perspective to expand
+ * @returns {string} The formatted prompt
+ */
+export function generateExpansionPrompt(topic, perspective) {
+  return `
+Expand on the "${perspective.title}" perspective of the topic "${topic}".
+
+Provide 3 supporting points that elaborate on this perspective.
+
+For each supporting point, include:
+1. A brief title
+2. A one-sentence explanation
+
+Return ONLY a JSON array with this structure:
+[
+  {
+    "title": "Supporting Point Title",
+    "explanation": "Explanation of this supporting point."
+  },
+  // ... 2 more objects with the same structure
+]
+`;
+}
+```
+
+# Test Strategy:
+Test prompts with various topics to ensure they generate consistent, well-structured responses. Verify that the prompts result in exactly 9 perspectives with the required fields. Test edge cases like very broad or very specific topics. Ensure the prompts guide the LLM to provide a balanced range from positive to negative perspectives.
