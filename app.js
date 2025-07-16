@@ -21,9 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Convert Gemini JSON to markdown
       const md = perspectivesToMarkdown(topic, data.perspectives || data);
       // mindmapMd.textContent = md;
+      console.log(md);
       mindmapContainer.innerHTML = `<script type="text/template" id="mindmap-md">
           # hovedretter
-          ${md}
+          ${md.replaceAll(" -", "###").replaceAll("-", "##")}
 
           ## Kulinarisk kreativitet og samvær
           ## Næring for krop og sjæl
