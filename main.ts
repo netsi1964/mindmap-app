@@ -1,6 +1,6 @@
 // main.ts
 import { analyzeTopic } from './llm-api.ts';
-import { initMindmap, renderMindmap } from './mindmap.ts';
+import { initMindmap, renderMindmap, addHoverFunctionality } from './mindmap.ts';
 import { exportAsJSON, exportAsMarkdown, exportAsSVG, downloadFile } from './utils/export.ts';
 import { setupImportButton } from './utils/import.ts';
 
@@ -28,7 +28,7 @@ themeToggle.addEventListener('click', () => {
 });
 
 // Analyze button logic
-const analyzeBtn = document.getElementById('analyze-btn')!;
+const analyzeBtn = document.getElementById('analyze-btn') as HTMLButtonElement;
 const topicInput = document.getElementById('topic-input') as HTMLInputElement;
 const loadingDiv = document.getElementById('loading')!;
 const mindmapContainer = document.getElementById('mindmap-container')!;
@@ -36,33 +36,43 @@ const mindmapContainer = document.getElementById('mindmap-container')!;
 let markmapInstance: any = null;
 let lastTopic: string = '';
 let lastPerspectives: any[] = [];
+let mindmapInitialized = false;
 
-analyzeBtn.addEventListener('click', async () => {
+function ensureMindmapInitialized() {
+  if (!markmapInstance) {
+    markmapInstance = initMindmap(mindmapContainer);
+    addHoverFunctionality(mindmapContainer);
+    mindmapInitialized = true;
+  }
+}
+
+analyzeBtn.addEventListener('click', analyzeHandler);
+topicInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') analyzeHandler();
+});
+
+async function analyzeHandler() {
   const topic = topicInput.value.trim();
   if (!topic) {
     alert('Indtast et emne!');
     return;
   }
   loadingDiv.classList.remove('hidden');
+  analyzeBtn.disabled = true;
   mindmapContainer.innerHTML = '';
   try {
     const result = await analyzeTopic(topic);
     lastTopic = topic;
     lastPerspectives = result.perspektiver || result;
-    if (typeof initMindmap === 'function' && typeof renderMindmap === 'function') {
-      if (!markmapInstance) {
-        markmapInstance = initMindmap(mindmapContainer);
-      }
-      renderMindmap(markmapInstance, topic, lastPerspectives);
-    } else {
-      mindmapContainer.innerHTML = `<pre class="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">${JSON.stringify(result, null, 2)}</pre>`;
-    }
+    ensureMindmapInitialized();
+    renderMindmap(markmapInstance, topic, lastPerspectives);
   } catch (err) {
     mindmapContainer.innerHTML = `<div class="text-red-500">Fejl: ${err}</div>`;
   } finally {
     loadingDiv.classList.add('hidden');
+    analyzeBtn.disabled = false;
   }
-});
+}
 
 // Export buttons
 const exportJsonBtn = document.getElementById('export-json')!;
@@ -92,6 +102,7 @@ exportSvgBtn.addEventListener('click', () => {
   downloadFile(content, `${lastTopic}.svg`, 'image/svg+xml');
 });
 
+// Import
 const importBtn = document.getElementById('import-btn')!;
 const importFileInput = document.getElementById('import-file') as HTMLInputElement;
 
@@ -99,8 +110,6 @@ setupImportButton(importBtn, importFileInput, (data) => {
   lastTopic = data.topic;
   lastPerspectives = data.perspectives;
   topicInput.value = lastTopic;
-  if (!markmapInstance) {
-    markmapInstance = initMindmap(mindmapContainer);
-  }
+  ensureMindmapInitialized();
   renderMindmap(markmapInstance, lastTopic, lastPerspectives);
 }); 
